@@ -61,6 +61,13 @@ class Card {
     this.y_pos = this.y_pos + num;
   }
 
+  set_x(num) {
+    /*
+    Sets the x_pos to a new value
+    */
+    this.x_pos = num
+  }
+
   set_y(num) {
     /*
     Sets the y_pos to a new value
@@ -69,10 +76,63 @@ class Card {
   }
 }
 
+class Deck {
+  /*
+  Class which handles deck functionality
+  */
+  constructor(deck) {
+    this.cards = deck;
+  }
+
+  shuffle_deck() {
+    /*
+    shuffles the deck
+    */
+    //swaps two cards 1000 times
+    for (let i = 0; i < 1000; i++) {
+      //gets two indexes in the list
+      let card_pos_a = generate_random_int(0, this.cards.length)
+      let card_pos_b = generate_random_int(0, this.cards.length);
+      //swaps them, using a temporary value so no data is lost
+      let temp = this.cards[card_pos_a];
+      this.cards[card_pos_a] = this.cards[card_pos_b];
+      this.cards[card_pos_b] = temp;
+    }
+    //returns the shuffled deck
+    return deck
+  }
+
+  give_out_card(hand) {
+    /*
+    Gives out a card and removes one from the deck
+    */
+    //adds last card in deck to hand
+    hand.cards.push(this.cards[this.cards.length - 1])
+    //removes it from deck
+    //TO BE DONE
+  }
+}
+
+class Hand {
+  constructor(cards) {
+    this.cards = cards
+  }
+
+  center_cards() {
+    //this is where the hand starts no matter the amount of cards
+    //i found it through some simple math
+    let beginning_offset = 624 - (32 * ((this.cards.length/2) + 0.5))
+    console.log(beginning_offset)
+    for (const [index, card] of this.cards.entries()) {
+      card.set_x(beginning_offset+(32*index))
+    }
+  }
+}
+
 function generate_random_int(min, max) {
   /*
   Generates random number
-  There is no easy built in library or functionin JavaScript
+  There is no easy built in library or function in JavaScript
   */
   return Math.floor(Math.random() * (max - min)) + min;
 }
@@ -192,70 +252,104 @@ function gen_deck() {
 //generate the list of card object and store it as a varible
 let deck = gen_deck();
 
-function shuffle_deck(deck) {
-  /*
-  shuffles the deck
-  */
-  //swaps two cards 1000 times
-  for (let i = 0; i < 1000; i++) {
-    //gets two indexes in the list
-    card_pos_a = generate_random_int(0, deck.length)
-    card_pos_b = generate_random_int(0, deck.length)
-    //swaps them, using a temporary value so no data is lost
-    temp = deck[card_pos_a]
-    deck[card_pos_a] = deck[card_pos_b]
-    deck[card_pos_b] = temp
-  }
-  //returns the shuffled deck
-  return deck
-}
+//creates deck object with deck
+deck = new Deck(deck);
 
 //shuffles the deck
-deck = shuffle_deck(deck)
+deck.shuffle_deck();
+//deck.center_cards();
+
+function create_player_hand(hand) {
+  for (let i = 0; i < 7; i++) {
+    deck.give_out_card(hand)
+  }
+}
+
+player_hand = new Hand([])
+player_hand = create_player_hand(player_hand)
 
 function get_mouse_pos(event) {
   /*
   Gets the current position of the mouse
   */
+  //gets the canva rect, giving its position relative to the viewport
   const canvas_rect = canvas.getBoundingClientRect();
+  //gets the x pos by subtracting the mouse by the canvas x position
   const x = event.clientX - canvas_rect.left;
+  //gets the y pos by subtracting the mouse by the canvas y position
   const y = event.clientY - canvas_rect.top;
+  //returns the x and y position
   return [x, y];
 }
 
+//sets the source of the image to the spritesheet
 img.src = "uno-cards.png";
+//without this, the image gets all blurry
 ctx.imageSmoothingEnabled= false;
 
+//sets the game loop to run 30 times per second (30 fps)
 let intervalLoop = setInterval(main, 1000/30);
+//upon loading the spritesheet, start the loop
 img.onload = intervalLoop;
 
+//adds an event listener for mouse movement
 canvas.addEventListener('mousemove', (event) => {
+  //gets the mouse position
   mouse_pos = get_mouse_pos(event)
+  //sets the card to null first, prevents later statement to occur
   selected_card = null
-  for (const card of deck) {
+  //iterates of all cards in deck
+  for (const card of deck.cards) {
+    //checks if the card is somewhere on the card
     if ((mouse_pos[0] >= card.x_pos) && (mouse_pos[0] <= card.x_pos+64)) {
       if ((mouse_pos[1] >= card.y_pos) && (mouse_pos[1] <= card.y_pos+84)) {
+        //sets the card to be the LAST card found in the list
         selected_card = card
       }
     }
   }
+  //if a card was found basically, null returns false and the class
+  //returns true
   if (selected_card) {
-    for (const card of deck) {
-      card.set_y(650)
+    //every card has its y set to the bottom
+    for (const card of deck.cards) {
+      card.set_y(642)
     }
-    console.log(selected_card.color+selected_card.number)
-    selected_card.change_y(-21)
+    //the selected card gets moved up a bit
+    selected_card.change_y(-42)
   }
 });
 
-for (const [index, card] of deck.entries()) {
-  card.change_x(32*index)
-  card.change_y(650)
+//adds event listener for a click
+canvas.addEventListener('click', (event) => {
+  //gets the mouse position
+  mouse_pos = get_mouse_pos(event)
+  //sets the card to null first, prevents later statement to occur
+  selected_card = null
+  //iterates over deck
+  for (const card of deck.cards) {
+    //checks if the card is somewhere on the card
+    if ((mouse_pos[0] >= card.x_pos) && (mouse_pos[0] <= card.x_pos+64)) {
+      if ((mouse_pos[1] >= card.y_pos) && (mouse_pos[1] <= card.y_pos+84)) {
+        //sets the card to be the LAST card found in the list
+        selected_card = card
+      }
+    }
+  }
+  //just logs the value for now
+  if (selected_card) {
+    console.log(selected_card.color+selected_card.number)
+  }
+})
+
+//sets the cards at the bottom before the to represent a "hand"
+for (const [index, card] of deck.cards.entries()) {
+  card.change_y(642)
 }
 
 function main() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
-  for (const card of deck) {
+  for (const card of deck.cards) {
     card.draw_card();
   }
 }

@@ -17,6 +17,7 @@ class Card {
     /*
     Method for constructing card object
     */
+    //spritesheet and sprite data is stored
     this.spritesheet = spritesheet;
     this.sprite_img_data = sprite_img_data;
     //here it takes the first character and sets it as the color
@@ -29,17 +30,40 @@ class Card {
     this.y_pos = 0;
     //creates a box for detecting if hovering over
     this.hover_box_height = 84;
+    //stores if the card is flipped or not
+    this.is_flipped = false;
+  }
+
+  get_needed_sprite_info() {
+    /*
+    Just checks if the card is flipped and sets the sprite to
+    be that when drawn
+    */
+    if (this.is_flipped == false) {
+      let needed_sprite_info = [
+        this.sprite_img_data[this.color][this.color+this.number][0],
+        this.sprite_img_data[this.color][this.color+this.number][1]
+      ]
+      return needed_sprite_info
+    } else {
+      let needed_sprite_info = [
+        this.sprite_img_data['W']['BACKSIDE'][0],
+        this.sprite_img_data['W']['BACKSIDE'][1]
+      ]
+      return needed_sprite_info
+    }
   }
 
   draw_card() {
     /*
     Function for drawing the card
     */
-   //uses the drawImage method of context
+    let needed_sprite_info = this.get_needed_sprite_info()
+    //uses the drawImage method of context
     ctx.drawImage(
       this.spritesheet, //takes in spritesheet
-      sprite_img_data[this.color][this.color+this.number][0], //the x
-      sprite_img_data[this.color][this.color+this.number][1], //and y
+      needed_sprite_info[0], //the x
+      needed_sprite_info[1], //and y
       32, //the original width in the spritesheet
       42, //and height
       this.x_pos, //the cards x
@@ -107,16 +131,28 @@ class Deck {
       this.cards[card_pos_a] = this.cards[card_pos_b];
       this.cards[card_pos_b] = temp;
     }
-    //returns the shuffled deck
-    return deck;
+  }
+
+  flip_cards() {
+    /*
+    Flips the cards in the deck over
+    Allows for them to be drawn, but not seen
+    */
+    for (const card of this.cards) {
+      card.is_flipped = true;
+    }
   }
 
   give_out_card(hand) {
     /*
     Gives out a card and removes one from the deck
     */
+    //gets the last card of the deck
+    let last_card = this.cards[this.cards.length - 1];
+    //flips it so that it is dealt
+    last_card.is_flipped = false;
     //adds last card in deck to hand
-    hand.cards.push(this.cards[this.cards.length - 1]);
+    hand.cards.push(last_card);
     //removes it from deck
     this.cards = this.cards.slice(0, this.cards.length - 1);
   }
@@ -265,19 +301,25 @@ function gen_deck() {
 }
 
 //generate the list of card object and store it as a varible
-let deck = gen_deck();
+let draw_deck = gen_deck();
 
 //creates deck object with deck
-deck = new Deck(deck);
+draw_deck = new Deck(draw_deck);
 
 //shuffles the deck
-deck.shuffle_deck();
+draw_deck.shuffle_deck();
+
+//flips the cards in the deck over
+draw_deck.flip_cards();
 
 /* Deck creation ends here */
 
 function create_player_hand(hand) {
+  /*
+  Creates player hand by dealing out cards
+  */
   for (let i = 0; i < 7; i++) {
-    deck.give_out_card(hand);
+    draw_deck.give_out_card(hand);
   }
 }
 
@@ -366,9 +408,18 @@ for (const card of player_hand.cards) {
   card.change_y(642);
 }
 
+//sets the draw deck to the correct position to represent the draw deck
+for (const card of draw_deck.cards) {
+  card.set_y(342);
+  card.set_x(10);
+}
+
 function main() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
   for (const card of player_hand.cards) {
+    card.draw_card();
+  }
+  for (const card of draw_deck.cards) {
     card.draw_card();
   }
 }

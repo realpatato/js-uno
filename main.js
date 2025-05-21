@@ -43,14 +43,14 @@ class Card {
       let needed_sprite_info = [
         this.sprite_img_data[this.color][this.color+this.number][0],
         this.sprite_img_data[this.color][this.color+this.number][1]
-      ]
-      return needed_sprite_info
+      ];
+      return needed_sprite_info;
     } else {
       let needed_sprite_info = [
         this.sprite_img_data['W']['BACKSIDE'][0],
         this.sprite_img_data['W']['BACKSIDE'][1]
-      ]
-      return needed_sprite_info
+      ];
+      return needed_sprite_info;
     }
   }
 
@@ -74,10 +74,15 @@ class Card {
   }
 
   get_index(hand_cards) {
+    /*
+    Gets the index of the card
+    */
+    //loops over the cards in the hand
     for (const [index, loop_card] of hand_cards.entries()) {
+      //checks if the card matches itself
       if (loop_card == this) {
-        let card_index = index;
-        return card_index
+        //returns the index
+        return index;
       }
     }
   }
@@ -193,7 +198,7 @@ class Deck {
 
 class Hand {
   constructor(cards) {;
-    this.cards = cards
+    this.cards = cards;
   }
 
   center_cards() {
@@ -206,16 +211,20 @@ class Hand {
       //sets each cards position to the offset plus
       //the amount they shift from that starting position
       card.set_x(beginning_offset+(32*index));
-      card.set_y(642)
+      card.set_y(642);
     }
   }
 
   use_card(card, play_deck) {
+    /*
+    Uses a card
+    */
+    //gets the index of the card
     let card_index = card.get_index(this.cards);
-    play_deck.push(card)
-    console.log(this.cards.slice(0, 0))
-    console.log(this.cards.slice(card_index + 2, this.cards.length))
-    this.cards = this.cards.slice(0, card_index).concat(this.cards.slice(card_index+1))
+    //adds it to the play deck
+    play_deck.push(card);
+    //removes the used card
+    this.cards = this.cards.slice(0, card_index).concat(this.cards.slice(card_index+1));
   }
 }
 
@@ -454,8 +463,12 @@ canvas.addEventListener('click', (event) => {
     //the color is the same as the playing card
     //the number is the same as the playing card
     //the card is a wild card
-    if ((selected_card.color == play_deck.cards[play_deck.cards.length - 1].color) || (selected_card.number == play_deck.cards[play_deck.cards.length - 1].number) || (selected_card.color == 'W')) {
-      console.log(selected_card.color+selected_card.number);
+    if ((selected_card.color == play_deck.cards[play_deck.cards.length - 1].color) 
+      || (selected_card.number == play_deck.cards[play_deck.cards.length - 1].number) 
+      || (selected_card.color == 'W')) {
+      player_hand.use_card(selected_card, play_deck.cards);
+      player_hand.center_cards();
+      play_deck.set_card_pos();
     }
   }
 })

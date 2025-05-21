@@ -73,6 +73,15 @@ class Card {
     );
   }
 
+  get_index(hand_cards) {
+    for (const [index, loop_card] of hand_cards.entries()) {
+      if (loop_card == this) {
+        let card_index = index;
+        return card_index
+      }
+    }
+  }
+
   change_x(num) {
     /*
     Increases the x_pos
@@ -163,7 +172,6 @@ class Deck {
         card.set_y(342);
         //offset from middle by a tad
         card.set_x(640);
-        console.log("play")
       }
     }
   }
@@ -200,6 +208,14 @@ class Hand {
       card.set_x(beginning_offset+(32*index));
       card.set_y(642)
     }
+  }
+
+  use_card(card, play_deck) {
+    let card_index = card.get_index(this.cards);
+    play_deck.push(card)
+    console.log(this.cards.slice(0, 0))
+    console.log(this.cards.slice(card_index + 2, this.cards.length))
+    this.cards = this.cards.slice(0, card_index).concat(this.cards.slice(card_index+1))
   }
 }
 
@@ -361,7 +377,6 @@ let play_deck = new Deck([], "play");
 draw_deck.give_out_card(play_deck);
 //positions play deck
 play_deck.set_card_pos();
-console.log(play_deck.cards)
 
 function get_mouse_pos(event) {
   /*
@@ -427,7 +442,7 @@ canvas.addEventListener('click', (event) => {
   for (const card of player_hand.cards) {
     //checks if the card is somewhere on the card
     if ((mouse_pos[0] >= card.x_pos) && (mouse_pos[0] <= card.x_pos+64)) {
-      if ((mouse_pos[1] >= card.y_pos) && (mouse_pos[1] <= card.y_pos+84)) {
+      if ((mouse_pos[1] >= card.y_pos) && (mouse_pos[1] <= card.y_pos+card.hover_box_height)) {
         //sets the card to be the LAST card found in the list
         selected_card = card;
       }
@@ -435,7 +450,13 @@ canvas.addEventListener('click', (event) => {
   }
   //just logs the value for now
   if (selected_card) {
-    console.log(selected_card.color+selected_card.number);
+    //giant if statement which check for any of the following:
+    //the color is the same as the playing card
+    //the number is the same as the playing card
+    //the card is a wild card
+    if ((selected_card.color == play_deck.cards[play_deck.cards.length - 1].color) || (selected_card.number == play_deck.cards[play_deck.cards.length - 1].number) || (selected_card.color == 'W')) {
+      console.log(selected_card.color+selected_card.number);
+    }
   }
 })
 

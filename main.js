@@ -113,8 +113,9 @@ class Deck {
   /*
   Class which handles deck functionality
   */
-  constructor(deck) {
+  constructor(deck, type) {
     this.cards = deck;
+    this.type = type;
   }
 
   shuffle_deck() {
@@ -140,6 +141,30 @@ class Deck {
     */
     for (const card of this.cards) {
       card.is_flipped = true;
+    }
+  }
+
+  set_card_pos() {
+    /*
+    Sets the cards to the proper positions based on which deck 
+    type it is
+    */
+    //checks type of deck
+    if (this.type == "draw") {
+      for (const card of this.cards) {
+        //centered y
+        card.set_y(342);
+        //offset from middle by a tad
+        card.set_x(544);
+      }
+    } else {
+      for (const card of this.cards) {
+        //centered y
+        card.set_y(342);
+        //offset from middle by a tad
+        card.set_x(640);
+        console.log("play")
+      }
     }
   }
 
@@ -173,6 +198,7 @@ class Hand {
       //sets each cards position to the offset plus
       //the amount they shift from that starting position
       card.set_x(beginning_offset+(32*index));
+      card.set_y(642)
     }
   }
 }
@@ -302,15 +328,14 @@ function gen_deck() {
 
 //generate the list of card object and store it as a varible
 let draw_deck = gen_deck();
-
 //creates deck object with deck
-draw_deck = new Deck(draw_deck);
-
+draw_deck = new Deck(draw_deck, "draw");
 //shuffles the deck
 draw_deck.shuffle_deck();
-
 //flips the cards in the deck over
 draw_deck.flip_cards();
+//sets the deck to the correct position
+draw_deck.set_card_pos();
 
 /* Deck creation ends here */
 
@@ -323,9 +348,20 @@ function create_player_hand(hand) {
   }
 }
 
-player_hand = new Hand([]);
+//creates hand object with empty hand
+let player_hand = new Hand([]);
+//adds cards to hand
 create_player_hand(player_hand);
+//centers the cards
 player_hand.center_cards();
+
+//creates the deck that will be played with
+let play_deck = new Deck([], "play");
+//given one card
+draw_deck.give_out_card(play_deck);
+//positions play deck
+play_deck.set_card_pos();
+console.log(play_deck.cards)
 
 function get_mouse_pos(event) {
   /*
@@ -403,16 +439,7 @@ canvas.addEventListener('click', (event) => {
   }
 })
 
-//sets the cards at the bottom before the to represent a "hand"
-for (const card of player_hand.cards) {
-  card.change_y(642);
-}
-
 //sets the draw deck to the correct position to represent the draw deck
-for (const card of draw_deck.cards) {
-  card.set_y(342);
-  card.set_x(10);
-}
 
 function main() {
   ctx.clearRect(0, 0, canvas.width, canvas.height)
@@ -420,6 +447,9 @@ function main() {
     card.draw_card();
   }
   for (const card of draw_deck.cards) {
+    card.draw_card();
+  }
+  for (const card of play_deck.cards) {
     card.draw_card();
   }
 }

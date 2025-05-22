@@ -87,20 +87,6 @@ class Card {
     }
   }
 
-  change_x(num) {
-    /*
-    Increases the x_pos
-    */
-    this.x_pos = this.x_pos + num;
-  }
-
-  change_y(num) {
-    /*
-    Increases the y_pos
-    */
-    this.y_pos = this.y_pos + num;
-  }
-
   set_x(num) {
     /*
     Sets the x_pos to a new value
@@ -436,7 +422,7 @@ canvas.addEventListener('mousemove', (event) => {
       card.set_hover_box_height(84);
     }
     //the selected card gets moved up a bit
-    selected_card.change_y(-42);
+    selected_card.set_y(600);
     selected_card.set_hover_box_height(126);
   }
 });

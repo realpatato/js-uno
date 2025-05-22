@@ -457,7 +457,7 @@ canvas.addEventListener('click', (event) => {
       }
     }
   }
-  //just logs the value for now
+  //if a card was found to be clicked on
   if (selected_card) {
     //giant if statement which check for any of the following:
     //the color is the same as the playing card
@@ -470,6 +470,35 @@ canvas.addEventListener('click', (event) => {
       player_hand.center_cards();
       play_deck.set_card_pos();
     }
+  } else {
+    //check for draw pile click
+    if ((mouse_pos[0] >= draw_deck.cards[draw_deck.cards.length - 1].x_pos) && (mouse_pos[0] <= draw_deck.cards[draw_deck.cards.length - 1].x_pos+64)) {
+      if ((mouse_pos[1] >= draw_deck.cards[draw_deck.cards.length - 1].y_pos) && (mouse_pos[1] <= draw_deck.cards[draw_deck.cards.length - 1].y_pos+84)) {
+        //gives the player a card
+        draw_deck.give_out_card(player_hand)
+        player_hand.center_cards()
+        console.log("card drawn")
+        //checks if the the draw deck is empty
+        if (draw_deck.cards.length == 0) {
+          console.log("swapped decks")
+          //swaps the draw deck and play deck
+          let temp = draw_deck
+          draw_deck = play_deck
+          play_deck = temp
+          //changes their type so that the positioning works
+          draw_deck.type = 'draw'
+          play_deck.type = 'play'
+          //gives the play deck a card to start out with
+          draw_deck.give_out_card(play_deck)
+          //sets the positions of the decks
+          draw_deck.set_card_pos()
+          play_deck.set_card_pos()
+          //shuffles the draw deck and flips it
+          draw_deck.flip_cards()
+          draw_deck.shuffle_deck()
+        }
+      }
+    }
   }
 })
 
@@ -480,8 +509,10 @@ function main() {
   for (const card of player_hand.cards) {
     card.draw_card();
   }
-  for (const card of draw_deck.cards) {
-    card.draw_card();
+  if (draw_deck.cards.length !== 0) {
+    for (const card of draw_deck.cards) {
+      card.draw_card();
+    }
   }
   for (const card of play_deck.cards) {
     card.draw_card();

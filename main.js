@@ -23,6 +23,11 @@ class Card {
     //here it takes the first character and sets it as the color
     //colors are one character names (R, G, B, Y, W)
     this.color = col_num.slice(0, 1);
+    //hidden color for the wild cards to be able to be played on
+    //given another color when played
+    if (this.color == 'W') {
+      this.hidden_color = 'W'
+    }
     //takes number and sets it as the number
     this.number = col_num.slice(1);
     //pos is set to 0, 0
@@ -83,6 +88,29 @@ class Card {
       if (loop_card == this) {
         //returns the index
         return index;
+      }
+    }
+  }
+
+  get_card_use() {
+    /*
+    Gets what the card DOES based on its number
+    */
+    if (this.color == 'W') {
+      if (this.number == 'P4') {
+        console.log("WILD PLUS FOUR PLAYED")
+      } else {
+        console.log("WILD PLAYED")
+      }
+    } else {
+      if (this.number == 'S') {
+        console.log("SKIP PLAYED")
+      } else if (this.number == 'R') {
+        console.log('REVERSE PLAYED')
+      } else if (this.number == 'P2') {
+        console.log('PLUS 2 PLAYED')
+      } else {
+        console.log('NON-SPECIAL CARD')
       }
     }
   }
@@ -207,6 +235,7 @@ class Hand {
     */
     //gets the index of the card
     let card_index = card.get_index(this.cards);
+    card.get_card_use();
     //adds it to the play deck
     play_deck.push(card);
     //removes the used card

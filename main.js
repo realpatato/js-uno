@@ -224,18 +224,43 @@ class Deck {
     */
     //gets the last card of the deck
     let last_card = this.cards[this.cards.length - 1];
-    //flips it so that it is dealt
-    last_card.is_flipped = false;
-    //adds last card in deck to hand
-    hand.cards.push(last_card);
-    //removes it from deck
-    this.cards = this.cards.slice(0, this.cards.length - 1);
+    //checks if its a player hand
+    if (hand.type == "play") {
+      //if the last card is a wild
+      if (last_card.color == "W") {
+        console.log("was a wild")
+        //adds last card that is in a list to the rest of the cards
+        //this basically shifts it to the bottom
+        this.cards = [last_card].concat(this.cards.slice(1, this.cards.length - 1))
+        console.log(this.cards)
+        //redoes the giving out
+        console.log(last_card)
+        this.give_out_card(hand)
+      } else {
+        //flips it so that it is dealt
+        last_card.is_flipped = false;
+        //adds last card in deck to hand
+        hand.cards.push(last_card);
+        //removes it from deck
+        this.cards = this.cards.slice(0, this.cards.length - 1);
+      }
+    }
+    if ((last_card.color != "W") || (hand.type != "play")) {
+      //flips it so that it is dealt
+      last_card.is_flipped = false;
+      //adds last card in deck to hand
+      hand.cards.push(last_card);
+      //removes it from deck
+      this.cards = this.cards.slice(0, this.cards.length - 1);
+    }
   }
 }
 
 class Hand {
   constructor(cards) {;
     this.cards = cards;
+    //this is purely so that deck can check when giving out
+    this.type = "playerhand";
   }
 
   center_cards() {

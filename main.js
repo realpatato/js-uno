@@ -519,7 +519,7 @@ function get_mouse_pos(event) {
 }
 
 //sets the source of the image to the spritesheet
-img.src = "uno-cards.png";
+img.src = "img/uno-cards.png";
 //without this, the image gets all blurry
 ctx.imageSmoothingEnabled= false;
 

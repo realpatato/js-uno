@@ -76,8 +76,20 @@ class Card {
       64, //the width
       84 //and height of the drawn image (scales it up if bigger)
     );
-    if (this.color == 'W') {
-
+    if ((this.color == 'W') && (this == play_deck.cards[play_deck.cards.length - 1])) {
+      if (this.hidden_color == 'W') {
+        ctx.fillStyle = "#000000";
+      } else if (this.hidden_color == 'R') {
+        ctx.fillStyle = "#ED1C24";
+      } else if (this.hidden_color == 'B') {
+        ctx.fillStyle = "#4C6CF4";
+      } else if (this.hidden_color == 'Y') {
+        ctx.fillStyle = "#FCC40C";
+      } else {
+        ctx.fillStyle = "#24B44C";
+      }
+      ctx.fillRect(656, 268, 32, 32);
+      ctx.strokeRect(656, 268, 32, 32);
     }
   }
 
@@ -459,12 +471,12 @@ draw_deck.give_out_card(play_deck);
 play_deck.set_card_pos();
 
 //create list of colors for wild buttons to use
-let button_colors = ["#ED1C24", "#4C6CF4", "#FCC40C", "#24B44C"]
+let button_colors = ["#ED1C24", "#4C6CF4", "#FCC40C", "#24B44C"];
 //create empty list to store the buttons
-let wild_buttons = []
+let wild_buttons = [];
 //create the wild buttons
 for (let i = 0; i < 4; i++) {
-  wild_buttons.push(new WildButton(button_colors[i], 512+(64*i), 568))
+  wild_buttons.push(new WildButton(button_colors[i], 512+(64*i), 568));
 }
 
 function get_mouse_pos(event) {
@@ -539,10 +551,11 @@ canvas.addEventListener('click', (event) => {
   }
   //if a card was found to be clicked on
   if (selected_card) {
-    //giant if statement which check for any of the following:
+    //giant if statement for both which checks for any of the following:
     //the color is the same as the playing card
     //the number is the same as the playing card
     //the card is a wild card
+    //checks if the last card is a wild card
     if (play_deck.cards[play_deck.cards.length - 1].color == 'W') {
       if ((selected_card.color == play_deck.cards[play_deck.cards.length - 1].hidden_color) 
         || (selected_card.number == play_deck.cards[play_deck.cards.length - 1].number) 
@@ -550,8 +563,8 @@ canvas.addEventListener('click', (event) => {
         player_hand.use_card(selected_card, play_deck.cards);
         player_hand.center_cards();
         play_deck.set_card_pos();
-      }
-    } else {
+      } 
+    } else { //otherwise
       if ((selected_card.color == play_deck.cards[play_deck.cards.length - 1].color) 
         || (selected_card.number == play_deck.cards[play_deck.cards.length - 1].number) 
         || (selected_card.color == 'W')) {
@@ -592,7 +605,7 @@ canvas.addEventListener('click', (event) => {
       if ((mouse_pos[0] >= button.x) && (mouse_pos[0] <= button.x+32)) {
         if ((mouse_pos[1] >= button.y) && (mouse_pos[1] <= button.y+32)) {
           play_deck.cards[play_deck.cards.length - 1].hidden_color = button.color_name;
-          button.set_buttons_false()
+          button.set_buttons_false();
         }
       }
     }
@@ -606,16 +619,11 @@ function main() {
   for (const card of player_hand.cards) {
     card.draw_card();
   }
-  for (const card of draw_deck.cards) {
-    card.draw_card();
-  }
-  for (const card of play_deck.cards) {
-    card.draw_card();
-  }
+  draw_deck.cards[draw_deck.cards.length - 1].draw_card();
+  play_deck.cards[play_deck.cards.length - 1].draw_card();
   if (wild_buttons[0].is_shown) {
     for (const button of wild_buttons) {
       button.draw_button();
     }
   }
-  console.log(play_deck.cards[play_deck.cards.length - 1].hidden_color)
 }

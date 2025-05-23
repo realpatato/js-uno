@@ -26,7 +26,7 @@ class Card {
     //hidden color for the wild cards to be able to be played on
     //given another color when played
     if (this.color == 'W') {
-      this.hidden_color = 'W'
+      this.hidden_color = 'W';
     }
     //takes number and sets it as the number
     this.number = col_num.slice(1);
@@ -63,7 +63,7 @@ class Card {
     /*
     Function for drawing the card
     */
-    let needed_sprite_info = this.get_needed_sprite_info()
+    let needed_sprite_info = this.get_needed_sprite_info();
     //uses the drawImage method of context
     ctx.drawImage(
       this.spritesheet, //takes in spritesheet
@@ -76,6 +76,9 @@ class Card {
       64, //the width
       84 //and height of the drawn image (scales it up if bigger)
     );
+    if (this.color == 'W') {
+
+    }
   }
 
   get_index(hand_cards) {
@@ -99,8 +102,10 @@ class Card {
     if (this.color == 'W') {
       if (this.number == 'P4') {
         console.log("WILD PLUS FOUR PLAYED")
+        this.wild()
       } else {
         console.log("WILD PLAYED")
+        this.wild()
       }
     } else {
       if (this.number == 'S') {
@@ -112,6 +117,12 @@ class Card {
       } else {
         console.log('NON-SPECIAL CARD')
       }
+    }
+  }
+
+  wild() {
+    for (const button of wild_buttons) {
+      button.is_shown = true;
     }
   }
 
@@ -240,6 +251,51 @@ class Hand {
     play_deck.push(card);
     //removes the used card
     this.cards = this.cards.slice(0, card_index).concat(this.cards.slice(card_index+1));
+  }
+}
+
+class WildButton {
+  /*
+  The buttons seen when you play a wild card
+  */
+  constructor(color, x, y) {
+    /*
+    Gives the button an x and a y
+    a variable to mark if its shown
+    and a variable for its color
+    */
+    this.color = color;
+    this.color_name = this.get_color_name();
+    this.x = x;
+    this.y = y;
+    this.is_shown = false;
+  }
+  
+  draw_button() {
+    ctx.fillStyle = this.color;
+    ctx.fillRect(this.x, this.y, 32, 32);
+    ctx.strokeRect(this.x, this.y, 32, 32);
+  }
+
+  get_color_name() {
+    /*
+    Gets the color name value based on the hex color
+    */
+    if (this.color == "#ED1C24") {
+      return "R";
+    } else if (this.color == "#4C6CF4") {
+      return "B";
+    } else if (this.color == "#FCC40C") {
+      return "Y";
+    } else {
+      return "G";
+    }
+  }
+
+  set_buttons_false() {
+    for (const button of wild_buttons) {
+      button.is_shown = false;
+    }
   }
 }
 
@@ -402,6 +458,15 @@ draw_deck.give_out_card(play_deck);
 //positions play deck
 play_deck.set_card_pos();
 
+//create list of colors for wild buttons to use
+let button_colors = ["#ED1C24", "#4C6CF4", "#FCC40C", "#24B44C"]
+//create empty list to store the buttons
+let wild_buttons = []
+//create the wild buttons
+for (let i = 0; i < 4; i++) {
+  wild_buttons.push(new WildButton(button_colors[i], 512+(64*i), 568))
+}
+
 function get_mouse_pos(event) {
   /*
   Gets the current position of the mouse
@@ -478,39 +543,56 @@ canvas.addEventListener('click', (event) => {
     //the color is the same as the playing card
     //the number is the same as the playing card
     //the card is a wild card
-    if ((selected_card.color == play_deck.cards[play_deck.cards.length - 1].color) 
-      || (selected_card.number == play_deck.cards[play_deck.cards.length - 1].number) 
-      || (selected_card.color == 'W')) {
-      player_hand.use_card(selected_card, play_deck.cards);
-      player_hand.center_cards();
-      play_deck.set_card_pos();
+    if (play_deck.cards[play_deck.cards.length - 1].color == 'W') {
+      if ((selected_card.color == play_deck.cards[play_deck.cards.length - 1].hidden_color) 
+        || (selected_card.number == play_deck.cards[play_deck.cards.length - 1].number) 
+        || (selected_card.color == 'W')) {
+        player_hand.use_card(selected_card, play_deck.cards);
+        player_hand.center_cards();
+        play_deck.set_card_pos();
+      }
+    } else {
+      if ((selected_card.color == play_deck.cards[play_deck.cards.length - 1].color) 
+        || (selected_card.number == play_deck.cards[play_deck.cards.length - 1].number) 
+        || (selected_card.color == 'W')) {
+        player_hand.use_card(selected_card, play_deck.cards);
+        player_hand.center_cards();
+        play_deck.set_card_pos();
+      }
     }
-  } else {
+  } else if ((mouse_pos[1] >= draw_deck.cards[draw_deck.cards.length - 1].y_pos) && (mouse_pos[1] <= draw_deck.cards[draw_deck.cards.length - 1].y_pos+84)) {
     //check for draw pile click
     if ((mouse_pos[0] >= draw_deck.cards[draw_deck.cards.length - 1].x_pos) && (mouse_pos[0] <= draw_deck.cards[draw_deck.cards.length - 1].x_pos+64)) {
-      if ((mouse_pos[1] >= draw_deck.cards[draw_deck.cards.length - 1].y_pos) && (mouse_pos[1] <= draw_deck.cards[draw_deck.cards.length - 1].y_pos+84)) {
-        //gives the player a card
-        draw_deck.give_out_card(player_hand)
-        player_hand.center_cards()
-        console.log("card drawn")
-        //checks if the the draw deck is empty
-        if (draw_deck.cards.length == 0) {
-          console.log("swapped decks")
-          //swaps the draw deck and play deck
-          let temp = draw_deck
-          draw_deck = play_deck
-          play_deck = temp
-          //changes their type so that the positioning works
-          draw_deck.type = 'draw'
-          play_deck.type = 'play'
-          //gives the play deck a card to start out with
-          draw_deck.give_out_card(play_deck)
-          //sets the positions of the decks
-          draw_deck.set_card_pos()
-          play_deck.set_card_pos()
-          //shuffles the draw deck and flips it
-          draw_deck.flip_cards()
-          draw_deck.shuffle_deck()
+      //gives the player a card
+      draw_deck.give_out_card(player_hand);
+      player_hand.center_cards();
+      console.log("card drawn");
+      //checks if the the draw deck is empty
+      if (draw_deck.cards.length == 0) {
+        console.log("swapped decks");
+        //swaps the draw deck and play deck
+        let temp = draw_deck;
+        draw_deck = play_deck;
+        play_deck = temp;
+        //changes their type so that the positioning works
+        draw_deck.type = 'draw';
+        play_deck.type = 'play';
+        //gives the play deck a card to start out with
+        draw_deck.give_out_card(play_deck);
+        //sets the positions of the decks
+        draw_deck.set_card_pos();
+        play_deck.set_card_pos();
+        //shuffles the draw deck and flips it
+        draw_deck.flip_cards();
+        draw_deck.shuffle_deck();
+      }
+    }
+  } else if (wild_buttons[0].is_shown) {
+    for (const button of wild_buttons) {
+      if ((mouse_pos[0] >= button.x) && (mouse_pos[0] <= button.x+32)) {
+        if ((mouse_pos[1] >= button.y) && (mouse_pos[1] <= button.y+32)) {
+          play_deck.cards[play_deck.cards.length - 1].hidden_color = button.color_name;
+          button.set_buttons_false()
         }
       }
     }
@@ -519,17 +601,21 @@ canvas.addEventListener('click', (event) => {
 
 //sets the draw deck to the correct position to represent the draw deck
 
-function main() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height)
+function main() { 
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
   for (const card of player_hand.cards) {
     card.draw_card();
   }
-  if (draw_deck.cards.length !== 0) {
-    for (const card of draw_deck.cards) {
-      card.draw_card();
-    }
+  for (const card of draw_deck.cards) {
+    card.draw_card();
   }
   for (const card of play_deck.cards) {
     card.draw_card();
   }
+  if (wild_buttons[0].is_shown) {
+    for (const button of wild_buttons) {
+      button.draw_button();
+    }
+  }
+  console.log(play_deck.cards[play_deck.cards.length - 1].hidden_color)
 }
